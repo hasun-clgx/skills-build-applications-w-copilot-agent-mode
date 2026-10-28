@@ -110,9 +110,12 @@ export async function suggestWorkouts(userEmail: string) {
     activityFocusCounts.set(focus, (activityFocusCounts.get(focus) ?? 0) + 1);
   }
 
-  const recentFocus = [...activityFocusCounts.entries()].sort((first, second) => second[1] - first[1])[0]?.[0];
   const goalFocus = user.fitnessGoal.trim().toLowerCase();
-  const preferredFocus = workouts.some((workout) => workout.focus.toLowerCase() === goalFocus)
+  const availableFocuses = new Set(workouts.map((workout) => workout.focus.toLowerCase()));
+  const recentFocus = [...activityFocusCounts.entries()]
+    .filter(([focus]) => availableFocuses.has(focus))
+    .sort((first, second) => second[1] - first[1])[0]?.[0];
+  const preferredFocus = availableFocuses.has(goalFocus)
     ? goalFocus
     : recentFocus ?? goalFocus;
 
