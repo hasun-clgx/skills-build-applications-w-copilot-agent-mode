@@ -9,21 +9,19 @@ type State<T> =
 type Props<T> = {
   title: string;
   description: string;
-  dataPath: string;
-  responseKey: string;
+  loadItems: () => Promise<T[]>;
   emptyMessage: string;
   renderItem: (item: T, index: number) => ReactNode;
 };
 
-export function CapabilityCard<T>({ title, description, dataPath, responseKey, emptyMessage, renderItem }: Props<T>) {
+export function CapabilityCard<T>({ title, description, loadItems, emptyMessage, renderItem }: Props<T>) {
   const [state, setState] = useState<State<T>>({ status: 'loading' });
 
   useEffect(() => {
     let active = true;
     setState({ status: 'loading' });
-    getJson<Record<string, T[]>>(dataPath)
-      .then((response) => {
-        const items = response[responseKey];
+    loadItems()
+      .then((items) => {
         if (!Array.isArray(items)) throw new Error('Invalid API response');
         if (active) setState({ status: 'success', items });
       })
@@ -32,7 +30,7 @@ export function CapabilityCard<T>({ title, description, dataPath, responseKey, e
       });
 
     return () => { active = false; };
-  }, [dataPath, responseKey]);
+  }, [loadItems]);
 
   return (
     <section className="card h-100">
