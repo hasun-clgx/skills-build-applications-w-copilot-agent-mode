@@ -59,6 +59,14 @@ export async function createTeam(input: unknown) {
     throw Object.assign(new Error('Team members must be valid user IDs'), { status: 400 });
   }
 
+  const memberIds = [...new Set(((members ?? []) as string[]).map((id) => id.toLowerCase()))];
+  if (memberIds.length > 0) {
+    const existingMembers = await User.countDocuments({ _id: { $in: memberIds } });
+    if (existingMembers !== memberIds.length) {
+      throw Object.assign(new Error('Team members must exist'), { status: 400 });
+    }
+  }
+
   return Team.create({ name: name.trim(), mascot: mascot.trim(), members: members ?? [] });
 }
 
