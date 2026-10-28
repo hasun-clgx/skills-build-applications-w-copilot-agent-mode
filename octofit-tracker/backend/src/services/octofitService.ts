@@ -124,12 +124,13 @@ export async function suggestWorkouts(userEmail: string) {
     .map((workout) => {
       const workoutFocus = workout.focus.toLowerCase();
       let reason = `Supports your ${goalFocus} fitness goal.`;
-      if (workoutFocus === goalFocus && recentActivities.length > 0) {
-        reason = `Matches your ${goalFocus} goal and recent ${recentActivities[0].type} activity.`;
+      const matchingActivity = recentActivities.find((activity) => focusForActivity(activity.type) === workoutFocus);
+      if (workoutFocus === goalFocus && matchingActivity) {
+        reason = `Matches your ${goalFocus} goal and recent ${matchingActivity.type} activity.`;
       } else if (workoutFocus === goalFocus) {
         reason = `Matches your ${goalFocus} fitness goal.`;
-      } else if (workoutFocus === recentFocus && recentActivities.length > 0) {
-        reason = `Based on your recent ${recentActivities[0].type} activity.`;
+      } else if (workoutFocus === recentFocus && matchingActivity) {
+        reason = `Based on your recent ${matchingActivity.type} activity.`;
       }
       return { ...workout, reason };
     });
